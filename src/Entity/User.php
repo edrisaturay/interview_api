@@ -21,13 +21,10 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  *     itemOperations={
  *      "get"={
  *          "normalization_context"={"groups"={"user:read", "user:item:get"}}
- *      },
- *      "put",
- *      "delete"
+ *      }
  *     },
  *     collectionOperations={
- *      "get",
- *      "post"
+ *      "get"
  *     },
  *     normalizationContext={"groups"={"user:read"}},
  *     denormalizationContext={"groups"={"user:write"}}
