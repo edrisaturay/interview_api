@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -9,16 +11,30 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ApiResource(
+ *     itemOperations={
+ *      "get"={
+ *          "normalization_context"={"groups"={"user:read", "user:item:get"}}
+ *      },
+ *      "put",
+ *      "delete"
+ *     },
+ *     collectionOperations={
+ *      "get",
+ *      "post"
+ *     },
  *     normalizationContext={"groups"={"user:read"}},
  *     denormalizationContext={"groups"={"user:write"}}
  * )
  * @UniqueEntity(fields={"username"})
  * @UniqueEntity(fields={"email"})
+ * @ApiFilter(SearchFilter::class, properties={"username": "exact", "email": "partial"})
  */
 class User implements UserInterface
 {
@@ -51,19 +67,39 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     *  @Groups({"user:read", "user:write"})
+     *  @Groups({"user:read", "user:write", "courses:item:get"})
      * @Assert\NotBlank()
+     * @ApiProperty(iri="http://schema.org/name")
      */
     private $username;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Course", mappedBy="owner")
+     * @Groups({"user:read", "user:write"})
+     * @MaxDepth(10)
      */
     private $courses;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Author", mappedBy="owner")
+     */
+    private $authors;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Student", mappedBy="owner")
+     */
+    private $students;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $status;
 
     public function __construct()
     {
         $this->courses = new ArrayCollection();
+        $this->authors = new ArrayCollection();
+        $this->students = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -178,6 +214,80 @@ class User implements UserInterface
                 $course->setOwner(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Author[]
+     */
+    public function getAuthors(): Collection
+    {
+        return $this->authors;
+    }
+
+    public function addAuthor(Author $author): self
+    {
+        if (!$this->authors->contains($author)) {
+            $this->authors[] = $author;
+            $author->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAuthor(Author $author): self
+    {
+        if ($this->authors->contains($author)) {
+            $this->authors->removeElement($author);
+            // set the owning side to null (unless already changed)
+            if ($author->getOwner() === $this) {
+                $author->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Student[]
+     */
+    public function getStudents(): Collection
+    {
+        return $this->students;
+    }
+
+    public function addStudent(Student $student): self
+    {
+        if (!$this->students->contains($student)) {
+            $this->students[] = $student;
+            $student->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStudent(Student $student): self
+    {
+        if ($this->students->contains($student)) {
+            $this->students->removeElement($student);
+            // set the owning side to null (unless already changed)
+            if ($student->getOwner() === $this) {
+                $student->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getStatus(): ?bool
+    {
+        return $this->status;
+    }
+
+    public function setStatus(bool $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
