@@ -2,6 +2,11 @@
 
 a small web application to manage a list of Courses. Each course has a name and an author
 
+a full working version can be viewed here at - 
+
+[Frontend Application](http://api-frontend.edrisa.com) and 
+[Backend Application](api-backend.edrisa.com)
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
@@ -121,7 +126,7 @@ an extensive api documentation is on this url and you can also see instructions 
 
 ## Authors
 
-* **Edrisa A. Turay Thompson** 
+* **Edrisa A. Turay** 
 * Website: https://edrisa.com 
 * Github [PaPZzzDNightmaare/interview_api](https://github.com/PaPZzzDNightmare/interview_api)
 
